@@ -1,0 +1,87 @@
+import json
+from fastapi import HTTPException
+from .models import FoodComposition, FoodInfo
+from .logger import setup_logger
+
+logger = setup_logger("response_processor")
+
+class InvalidFormatException(Exception):
+    pass
+
+class ResponseValidator:
+    @staticmethod
+    def validate_and_convert(json_data):
+        required_fields = {
+            "food_name": str,
+            "calories_Kcal": (int, float),
+            "certainty": (int, float),
+            "food_composition": dict,
+        }
+        composition_fields = {
+            "fat_in_g": (int, float),
+            "protein_in_g": (int, float),
+            "sugar_in_g": (int, float),
+        }
+        
+        # Validate required fields
+        for field, field_type in required_fields.items():
+            if field not in json_data:
+                raise InvalidFormatException(f"Field '{field}' is missing.")
+            if not isinstance(json_data[field], field_type):
+                try:
+                    if field_type == (int, float):
+                        json_data[field] = float(json_data[field])
+                except ValueError:
+                    raise InvalidFormatException(f"Field '{field}' is not of type {field_type}.")
+        
+        # Validate food composition fields
+        for field, field_type in composition_fields.items():
+            if field not in json_data["food_composition"]:
+                raise InvalidFormatException(f"Field 'food_composition.{field}' is missing.")
+            if not isinstance(json_data["food_composition"][field], field_type):
+                try:
+                    if field_type == (int, float):
+                        json_data["food_composition"][field] = float(json_data["food_composition"][field])
+                except ValueError:
+                    raise InvalidFormatException(f"Field 'food_composition.{field}' is not of type {field_type}.")
+
+        return json_data
+
+class ResponseProcessor:
+    @staticmethod
+    def process_response(content):
+        clean_content = content.replace("\n", "")
+        
+        try:
+            json_data = json.loads(clean_content)
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON decode error: {e}")
+            raise HTTPException(status_code=422, detail="Invalid JSON format")
+        
+        try:
+            json_data = ResponseValidator.validate_and_convert(json_data)
+        except InvalidFormatException as e:
+            logger.error(f"Validation error: {e}")
+            raise HTTPException(status_code=422, detail=str(e))
+
+        try:
+            food_composition = FoodComposition(
+                fat_in_g=json_data["food_composition"]["fat_in_g"],
+                protein_in_g=json_data["food_composition"]["protein_in_g"],
+                sugar_in_g=json_data["food_composition"]["sugar_in_g"]
+            )
+
+            food_info = FoodInfo(
+                certainty=json_data["certainty"],
+                food_name=json_data["food_name"],
+                calories_Kcal=json_data["calories_Kcal"],
+                food_composition=food_composition
+            )
+        except KeyError as e:
+            logger.error(f"Key error: {e}")
+            raise HTTPException(status_code=422, detail=f"Missing field: {str(e)}")
+        except ValueError as e:
+            logger.error(f"Value error: {e}")
+            raise HTTPException(status_code=422, detail=f"Invalid value: {str(e)}")
+
+        return food_info
