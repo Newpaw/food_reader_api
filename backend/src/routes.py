@@ -5,10 +5,12 @@ from pydantic import BaseModel
 
 from .response_processor import ResponseProcessor
 from .openai_client import OpenAIClient
-from .models import FoodInfo, DailyIntake
+from .models import FoodInfo
 from .config import settings
 from .logger import setup_logger
-from .processors import IntakeProcessor
+from calculator.processors import IntakeProcessor
+from calculator.models import DailyIntake
+    
 
 router = APIRouter()
 logger = setup_logger("routes")
@@ -74,7 +76,7 @@ async def analyze_image(file: UploadFile = File(...), credentials: HTTPBasicCred
             return food_info
         else:
             logger.error("Processing failed")
-            raise HTTPException(status_code=500, detail="Processing failed")
+            raise HTTPException(status_code=500, detail=f"Processing failed with info: {content}")
     finally:
         if os.path.exists(temp_file_path):
             os.remove(temp_file_path)  # Clean up the temporary file

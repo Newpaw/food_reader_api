@@ -1,10 +1,10 @@
-import logging
+from src.logger import setup_logger
 from fastapi import HTTPException
 from .models import DailyIntake
 from .validators import InputValidator, InvalidInputException
 from .calculators import IntakeCalculator
 
-logger = logging.getLogger(__name__)
+logger = setup_logger("processors")
 
 class IntakeProcessor:
     @staticmethod
