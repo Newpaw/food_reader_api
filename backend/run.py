@@ -1,4 +1,4 @@
-from src import create_app
+from src.fastapi_module import create_app
 
 
 backend = create_app()

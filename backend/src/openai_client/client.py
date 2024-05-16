@@ -1,5 +1,5 @@
 from openai import OpenAI
-from .config import settings
+from ..config.settings import settings
 
 class OpenAIClient:
     def __init__(self):

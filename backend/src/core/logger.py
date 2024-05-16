@@ -1,5 +1,5 @@
 import logging
-from .config import settings
+from ..config.settings import settings
 
 def setup_logger(name: str) -> logging.Logger:
     log_level = settings.LOG_LEVEL

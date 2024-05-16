@@ -1,7 +1,7 @@
 from dataclasses import dataclass, asdict
 from sqlalchemy import Column, Integer, Float, String
 
-from .database import Base
+from .base import Base
 
 
 @dataclass

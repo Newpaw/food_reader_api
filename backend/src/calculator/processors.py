@@ -1,4 +1,4 @@
-from src.logger import setup_logger
+from ..core.logger import setup_logger
 from fastapi import HTTPException
 from .models import DailyIntake
 from .validators import InputValidator, InvalidInputException

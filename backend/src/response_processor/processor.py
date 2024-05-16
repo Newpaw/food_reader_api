@@ -1,7 +1,7 @@
 import json
 from fastapi import HTTPException
-from .models import FoodInfo
-from .logger import setup_logger
+from ..database.models import FoodInfo
+from ..core.logger import setup_logger
 
 logger = setup_logger("response_processor")
 
