@@ -10,7 +10,7 @@ class InputValidator:
         required_fields = {
             "height_cm": float,
             "weight_kg": float,
-            "age": int,
+            "age": float,
             "gender": str,
             "activity_level": str
         }

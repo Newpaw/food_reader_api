@@ -1,5 +1,4 @@
 from openai import OpenAI
-from dotenv import load_dotenv
 from .config import settings
 
 class OpenAIClient:
@@ -16,7 +15,7 @@ class OpenAIClient:
             role="user",
             content=[
                 {"type": "text", "text": "Get me the info."},
-                {"type": "image_file", "image_file": {"file_id": file_id}}
+                {"type": "image_file", "image_file": {"file_id": file_id, "detail": "high"}}
             ]
         )
 

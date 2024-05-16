@@ -23,6 +23,7 @@ class IntakeCalculator:
         sugar_g = daily_calories * 0.1 / 4
 
         return DailyIntake(
+            user_id=user_info.user_id,
             calories=daily_calories,
             fat_g=fat_g,
             sugar_g=sugar_g,

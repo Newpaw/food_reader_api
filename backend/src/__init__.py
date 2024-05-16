@@ -1,5 +1,6 @@
 from fastapi import FastAPI
-from .config import settings
+from fastapi.middleware.cors import CORSMiddleware
+
 
 def create_app() -> FastAPI:
     """
@@ -11,6 +12,15 @@ def create_app() -> FastAPI:
         title="Food recognition API",
         version="0.0.2",
         description="An API for food recognition",
+    )
+    origins = ["*"]  # Allow all origins
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
 
     from .routes import setup_routes
