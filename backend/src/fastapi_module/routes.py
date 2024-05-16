@@ -59,6 +59,20 @@ async def calculate_intake(user_info: UserInfoRequest, db: Session = Depends(get
     finally:
         db.close()
 
+@router.get("/calculate-intake", response_model=DailyIntake)
+async def calculate_intake(user_id: int, db: Session = Depends(get_db)):
+    try:
+        db_transaction = db.query(ColoriesToDB).filter(ColoriesToDB.user_id == user_id).first()
+        print(db_transaction)
+        if db_transaction:
+            return db_transaction.to_dict()
+        else:
+            raise HTTPException(status_code=404, detail="User not found")
+    except HTTPException as e:
+        db.rollback()
+        raise e
+
+
 
 @router.post("/analyze-image", response_model=FoodInfo)
 async def analyze_image(db: Session = Depends(get_db), file: UploadFile = File(...)):

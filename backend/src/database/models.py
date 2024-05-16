@@ -26,6 +26,16 @@ class ColoriesToDB(Base):
     sugar_g = Column(Float, nullable=False)
     protein_g = Column(Float, nullable=False)
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "calories": self.calories,
+            "fat_g": self.fat_g,
+            "sugar_g": self.sugar_g,
+            "protein_g": self.protein_g
+        }
+
 
 class FoodInfoToDB(Base):
     __tablename__ = "food_info"
