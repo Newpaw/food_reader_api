@@ -6,12 +6,12 @@ from pydantic import BaseModel
 
 from .database import SessionLocal, engine
 from .response_processor import ResponseProcessor
-from .openai_client import OpenAIClient
+from .openai_client.client import OpenAIClient
 from .models import FoodInfo, Base, ColoriesToDB, FoodInfoToDB
 from .config import settings
 from .logger import setup_logger
-from calculator.processors import IntakeProcessor
-from calculator.models import DailyIntake
+from .calculator.processors import IntakeProcessor
+from .calculator.models import DailyIntake
 
 
 router = APIRouter()
