@@ -40,7 +40,7 @@ const CalculateIntake = () => {
   const handleSubmit = async (values, { setSubmitting }) => {
     setLoading(true);
     try {
-      const response = await axiosInstance.post('/calculate-intake', values);
+      const response = await axiosInstance.post('/api/calculate-intake', values);
       setResult(response.data);
     } catch (error) {
       alert('Error');

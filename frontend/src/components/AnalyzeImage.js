@@ -53,7 +53,7 @@ const AnalyzeImage = () => {
     setLoading(true);
 
     try {
-      const response = await axiosInstance.post('/analyze-image', formData, {
+      const response = await axiosInstance.post('/api/analyze-image', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

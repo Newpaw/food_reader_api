@@ -27,7 +27,7 @@ const Ping = () => {
   const handlePing = async () => {
     setLoading(true);
     try {
-      const response = await axiosInstance.get('/ping');
+      const response = await axiosInstance.get('/api/ping');
       setMessage(response.data.message);
     } catch (error) {
       setMessage('Error');
