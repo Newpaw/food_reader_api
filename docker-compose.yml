@@ -27,8 +27,6 @@ services:
       - "80:80"
     environment:
       - REACT_APP_BACKEND_URL=/api
-    volumes:
-      - ./nginx:/etc/nginx
     networks:
       - nginx_default
       - backend
