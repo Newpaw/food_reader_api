@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from .database import engine, Base
 
 
 def create_app() -> FastAPI:
@@ -25,5 +26,8 @@ def create_app() -> FastAPI:
 
     from .routes import setup_routes
     setup_routes(app)
+
+    # Vytvoření tabulek v databázi podle modelů
+    Base.metadata.create_all(bind=engine)
 
     return app

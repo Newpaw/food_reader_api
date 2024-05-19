@@ -1,20 +1,5 @@
-from dataclasses import dataclass, asdict
 from sqlalchemy import Column, Integer, Float, String
-
 from .database import Base
-
-
-@dataclass
-class FoodInfo:
-    certainty: float | int
-    food_name: str
-    calories_Kcal: float | int
-    fat_in_g: float | int
-    protein_in_g: float | int
-    sugar_in_g: float | int
-
-    def to_dict(self):
-        return asdict(self)
 
 
 class ColoriesToDB(Base):
