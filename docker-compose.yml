@@ -28,7 +28,7 @@ services:
     environment:
       - REACT_APP_BACKEND_URL=/api
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx:/etc/nginx
     networks:
       - nginx_default
       - backend
