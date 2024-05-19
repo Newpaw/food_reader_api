@@ -1,9 +1,4 @@
 version: '3.8'
-networks:
-  nginx_default:
-    external: true
-  backend:
-    driver: bridge
 
 services:
   backend:
@@ -16,8 +11,6 @@ services:
       - "8000:8000"
     env_file:
       - ./backend/.env
-    networks:
-      - backend
 
   frontend:
     container_name: frontend
@@ -26,7 +19,4 @@ services:
     ports:
       - "80:80"
     environment:
-      - REACT_APP_BACKEND_URL=http://backend:8000
-    networks:
-      - nginx_default
-      - backend
+      - REACT_APP_BACKEND_URL=http://127.0.0.1:8000
