@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { ClipLoader } from 'react-spinners';
 import axiosInstance from '../axiosConfig';
-import Resizer from 'react-image-file-resizer';
 
 const Container = styled.div`
   display: flex;
@@ -45,22 +44,7 @@ const AnalyzeImage = () => {
   const [loading, setLoading] = useState(false);
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Resize the image before setting it to state
-      Resizer.imageFileResizer(
-        file,
-        800, // maxWidth
-        800, // maxHeight
-        'JPEG', // compressFormat
-        95, // quality
-        0, // rotation
-        (uri) => {
-          setFile(uri);
-        },
-        'blob' // outputType
-      );
-    }
+    setFile(e.target.files[0]);
   };
 
   const handleSubmit = async () => {
