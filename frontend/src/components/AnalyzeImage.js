@@ -60,7 +60,8 @@ const AnalyzeImage = () => {
       });
       setFoodInfo(response.data);
     } catch (error) {
-      alert('Error');
+      alert('Error analyzing image. Catch error: ' + error.message);
+      console.error('Error analyzing image:', error);
     } finally {
       setLoading(false);
     }

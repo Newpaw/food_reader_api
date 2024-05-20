@@ -45,7 +45,7 @@ class ResponseProcessor:
         try:
             json_data = json.loads(clean_content)
         except json.JSONDecodeError as e:
-            logger.error(f"JSON decode error: {e}")
+            logger.error(f"JSON decode error: {e}. The response was: {content}")
             raise HTTPException(
                 status_code=422, detail=f"Invalid JSON format. The response was: {content}")
 
