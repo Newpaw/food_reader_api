@@ -1,14 +1,13 @@
 import json
+import re
 from fastapi import HTTPException
 from .schema import FoodInfo
 from .logger import setup_logger
 
 logger = setup_logger("response_processor")
 
-
 class InvalidFormatException(Exception):
     pass
-
 
 class ResponseValidator:
     @staticmethod
@@ -36,11 +35,17 @@ class ResponseValidator:
 
         return json_data
 
-
 class ResponseProcessor:
     @staticmethod
     def process_response(content: str) -> FoodInfo:
-        clean_content = content.replace("\n", "")
+        # Extract JSON content using regular expression
+        match = re.search(r'({.*?})', content, re.DOTALL)
+        if match:
+            clean_content = match.group(1).strip()
+        else:
+            logger.error(f"JSON decode error: Invalid JSON format. The response was: {content}")
+            raise HTTPException(
+                status_code=422, detail=f"Invalid JSON format. The response was: {content}")
 
         try:
             json_data = json.loads(clean_content)
@@ -57,7 +62,6 @@ class ResponseProcessor:
                 status_code=422, detail=f"{str(e)}. The response was: {content}")
 
         try:
-
             food_info = FoodInfo(
                 certainty=json_data["certainty"],
                 food_name=json_data["food_name"],
@@ -65,7 +69,6 @@ class ResponseProcessor:
                 fat_in_g=json_data["fat_in_g"],
                 protein_in_g=json_data["protein_in_g"],
                 sugar_in_g=json_data["sugar_in_g"],
-                
             )
         except KeyError as e:
             logger.error(f"Key error: {e}")

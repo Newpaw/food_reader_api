@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 class UserInfoRequest(BaseModel):
     user_id: int
@@ -11,8 +11,7 @@ class UserInfoRequest(BaseModel):
 class UserInfoRequestModel(UserInfoRequest):
     id: int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class FoodInfo(BaseModel):
     certainty: float | int
@@ -22,5 +21,4 @@ class FoodInfo(BaseModel):
     protein_in_g: float | int
     sugar_in_g: float | int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
