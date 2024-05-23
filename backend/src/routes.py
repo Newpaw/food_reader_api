@@ -86,16 +86,18 @@ async def analyze_image(db: db_dependency, file: UploadFile = File(...)):
         else:
             logger.error("Processing failed")
             raise HTTPException(
-                status_code=500, detail=f"Processing failed with info: {content}"
+                status_code=500, detail="Processing failed with no additional info"
             )
     except HTTPException as e:
         db.rollback()
         raise e
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Internal server error")
     finally:
         if os.path.exists(temp_file_path):
             os.remove(temp_file_path)  # Čištění dočasného souboru
         db.close()
-
 
 def setup_routes(app: FastAPI) -> None:
     """
