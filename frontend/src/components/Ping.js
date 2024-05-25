@@ -1,24 +1,6 @@
 import React, { useState } from 'react';
-import styled from 'styled-components';
-import { ClipLoader } from 'react-spinners';
+import { PacmanLoader } from 'react-spinners';
 import axiosInstance from '../axiosConfig';
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 50px;
-`;
-
-const Button = styled.button`
-  padding: 10px 20px;
-  margin-top: 20px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-`;
 
 const Ping = () => {
   const [message, setMessage] = useState('');
@@ -37,15 +19,22 @@ const Ping = () => {
   };
 
   return (
-    <Container>
-      <h1>Ping Endpoint</h1>
-      <Button onClick={handlePing}>Ping</Button>
+    <div className="flex flex-col items-center mt-12">
+      <h1 className="text-2xl font-bold">Ping Endpoint</h1>
+      <button 
+        className="mt-5 px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+        onClick={handlePing}
+      >
+        Ping
+      </button>
       {loading ? (
-        <ClipLoader size={50} color={"#4CAF50"} loading={loading} />
+        <div className="mt-5">
+          <PacmanLoader color={"#4CAF50"} loading={loading} />
+        </div>
       ) : (
-        message && <p>{message}</p>
+        message && <p className="mt-5">{message}</p>
       )}
-    </Container>
+    </div>
   );
 };
 

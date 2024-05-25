@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Formik, Form, Field } from 'formik';
-import { ClipLoader } from 'react-spinners';
+import { PacmanLoader } from 'react-spinners';
 import axiosInstance from '../axiosConfig';
 
 const CalculateIntake = () => {
@@ -18,10 +18,7 @@ const CalculateIntake = () => {
   const handleSubmit = async (values, { setSubmitting }) => {
     setLoading(true);
     try {
-      const response = await axiosInstance.post(
-        '/api/calculate-intake',
-        values
-      );
+      const response = await axiosInstance.post('/api/calculate-intake', values);
       setResult(response.data);
     } catch (error) {
       alert('Error');
@@ -32,10 +29,8 @@ const CalculateIntake = () => {
 
   return (
     <div className="flex flex-col items-center mt-12">
-      <h1 className="text-xl font-bold text-center text-gray-800 mt-8 mb-4">
-        Calculate Intake
-      </h1>
-
+      <h1 className="text-xl font-bold text-center text-gray-800 mt-8 mb-4">Calculate Intake</h1>
+      
       <Formik initialValues={initialValues} onSubmit={handleSubmit}>
         {({ isSubmitting }) => (
           <Form>
@@ -103,12 +98,10 @@ const CalculateIntake = () => {
               Calculate
             </button>
 
-            <button className="rounded-full bg-brand-500 px-5 py-3 text-base font-medium text-white transition duration-200 hover:bg-brand-600 active:bg-brand-700 dark:bg-brand-400 dark:text-white dark:hover:bg-brand-300 dark:active:bg-brand-200">
-              Default
-            </button>
-
             {loading && (
-              <ClipLoader size={50} color={'#4CAF50'} loading={loading} />
+              <div className="mt-5">
+                <PacmanLoader size={50} color={'#4CAF50'} loading={loading} />
+              </div>
             )}
           </Form>
         )}
@@ -116,18 +109,10 @@ const CalculateIntake = () => {
       {result && (
         <div className="mb-5">
           <h2>Daily Intake</h2>
-          <p>
-            <strong>Calories:</strong> {result.calories}
-          </p>
-          <p>
-            <strong>Protein (g):</strong> {result.protein_g}
-          </p>
-          <p>
-            <strong>Fat (g):</strong> {result.fat_g}
-          </p>
-          <p>
-            <strong>Sugar (g):</strong> {result.sugar_g}
-          </p>
+          <p><strong>Calories:</strong> {result.calories}</p>
+          <p><strong>Protein (g):</strong> {result.protein_g}</p>
+          <p><strong>Fat (g):</strong> {result.fat_g}</p>
+          <p><strong>Sugar (g):</strong> {result.sugar_g}</p>
         </div>
       )}
     </div>

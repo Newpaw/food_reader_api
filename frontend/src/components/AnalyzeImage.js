@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ClipLoader } from 'react-spinners';
+import { PacmanLoader } from 'react-spinners';
 import axiosInstance from '../axiosConfig';
 
 const AnalyzeImage = () => {
@@ -39,7 +39,9 @@ const AnalyzeImage = () => {
         Upload
       </button>
       {loading ? (
-        <ClipLoader size={50} color={"#4CAF50"} loading={loading} />
+        <div className="mt-5">
+          <PacmanLoader size={50} color={"#4CAF50"} loading={loading} />
+        </div>
       ) : (
         foodInfo && (
           <div className="mt-5 p-5 border border-gray-300 rounded bg-gray-100 w-72 text-left">
