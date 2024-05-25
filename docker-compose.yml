@@ -6,6 +6,19 @@ networks:
     driver: bridge
 
 services:
+
+  postgres:
+    image: postgres:alpine
+    container_name: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - ./backend/.env
+    ports:
+      - "5432:5432"
+    networks:
+      - backend
+
   backend:
     container_name: backend
     build:
@@ -30,3 +43,7 @@ services:
     networks:
       - nginx_default
       - backend
+
+
+volumes:
+  postgres_data:

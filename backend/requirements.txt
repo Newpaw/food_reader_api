@@ -7,3 +7,4 @@ pytest
 SQLAlchemy
 aiofiles
 pytest-mock
+psycopg2-binary

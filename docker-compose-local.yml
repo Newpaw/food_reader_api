@@ -1,6 +1,16 @@
 version: '3.8'
 
 services:
+  postgres:
+    image: postgres:alpine
+    container_name: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - ./backend/.env
+    ports:
+      - "5432:5432"
+
   backend:
     container_name: backend
     build:
@@ -11,6 +21,9 @@ services:
       - "8000:8000"
     env_file:
       - ./backend/.env
+    depends_on:
+      - postgres
+
 
   frontend:
     container_name: frontend
@@ -20,3 +33,6 @@ services:
       - "80:80"
     environment:
       - REACT_APP_BACKEND_URL=http://127.0.0.1:8000
+
+volumes:
+  postgres_data:

@@ -42,3 +42,5 @@ This is the first version of a food analysis application which detects food item
     ASSISTANT_ID=asst_EUXQgAVcCLLJ3F0i0bx1SKJs
 
     LOG_LEVEL=
+
+    DATABASE_URL=postgresql+psycopg2://user:psw@postgres:5432/postgres

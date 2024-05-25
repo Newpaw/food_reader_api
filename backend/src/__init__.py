@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine, Base
 
-
 def create_app() -> FastAPI:
     """
     Application factory function. This function creates and configures
