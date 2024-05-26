@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { PacmanLoader } from 'react-spinners';
 import axiosInstance from '../axiosConfig';
 
@@ -6,9 +6,15 @@ const AnalyzeImage = () => {
   const [file, setFile] = useState(null);
   const [foodInfo, setFoodInfo] = useState(null);
   const [loading, setLoading] = useState(false);
+  const fileInputRef = useRef(null);
 
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+    const selectedFile = e.target.files[0];
+    setFile(selectedFile);
+  };
+
+  const handleButtonClick = () => {
+    fileInputRef.current.click();
   };
 
   const handleSubmit = async () => {
@@ -34,10 +40,37 @@ const AnalyzeImage = () => {
   return (
     <div className="flex flex-col items-center mt-12">
       <h1 className="text-2xl font-bold">Analyze Image</h1>
-      <input type="file" onChange={handleFileChange} className="mt-5" />
-      <button onClick={handleSubmit} className="mt-5 px-4 py-2 bg-green-600 text-white rounded">
-        Upload
-      </button>
+      <input
+        type="file"
+        onChange={handleFileChange}
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        ref={fileInputRef}
+      />
+      <div className="mt-5 flex items-center">
+        <button
+          onClick={handleButtonClick}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+        >
+          {file ? 'Change Image' : 'Choose an Image'}
+        </button>
+        {file && (
+          <img
+            src={URL.createObjectURL(file)}
+            alt="Thumbnail"
+            className="ml-4 w-16 h-16 object-cover rounded"
+          />
+        )}
+      </div>
+      {file && (
+        <button
+          onClick={handleSubmit}
+          className="mt-5 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+        >
+          Upload
+        </button>
+      )}
       {loading ? (
         <div className="mt-5">
           <PacmanLoader size={50} color={"#4CAF50"} loading={loading} />
