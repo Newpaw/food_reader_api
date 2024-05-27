@@ -8,7 +8,7 @@ from sqlalchemy import text
 from .database import get_db
 from .response_processor import ResponseProcessor
 from .openai_client.client import OpenAIClient
-from .models import UserCalories, FoodInfoToDB
+from .models import UserCalories, FoodInfoDB
 from .config import settings
 from .logger import setup_logger
 from .calculator.processors import IntakeProcessor
@@ -17,7 +17,7 @@ from .schema import UserInfoRequest, FoodInfo
 from .services import get_db_type
 
 router = APIRouter()
-logger = setup_logger("routes")
+logger = setup_logger(__name__)
 
 assistant_id = settings.ASSISTANT_ID
 db_dependency = Annotated[Session, Depends(get_db)]
@@ -80,25 +80,28 @@ async def analyze_image(db: db_dependency, file: UploadFile = File(...)):
 
     temp_file_path = f"temp_{file.filename}"
     try:
-        # Uložení souboru dočasně na disk
         with open(temp_file_path, "wb") as buffer:
             buffer.write(await file.read())
 
-        # Interakce s OpenAI klientem
         thread = client.create_thread()
+        logger.debug(f"Created thread with thread_id: {thread.id}")
+
         file_id = client.upload_file(temp_file_path)
+        logger.debug(f"Uploaded file with file_id: {file_id}")
+
         client.create_message(thread.id, file_id)
 
         run = client.create_and_poll_run(thread.id, assistant_id)
+        logger.debug(f"Created and polled run with run_id: {run.id}")
 
         if run.status == "completed":
             messages = client.list_messages(thread.id)
             content = messages.data[0].content[0].text.value
-            logger.debug(content)
+            logger.debug(f"Content: {content}")
 
             # Zpracování odpovědi a uložení do databáze
             food_info = ResponseProcessor.process_response(content)
-            db_transaction = FoodInfoToDB(**food_info.model_dump())
+            db_transaction = FoodInfoDB(**food_info.model_dump())
             db.add(db_transaction)
             db.commit()
             db.refresh(db_transaction)

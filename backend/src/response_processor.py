@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from .schema import FoodInfo
 from .logger import setup_logger
 
-logger = setup_logger("response_processor")
+logger = setup_logger(__name__)
 
 class InvalidFormatException(Exception):
     pass

@@ -1,6 +1,7 @@
 import logging
 from .config import settings
 
+
 def setup_logger(name: str) -> logging.Logger:
     log_level = settings.LOG_LEVEL
     numeric_level = getattr(logging, log_level.upper(), None)
@@ -24,7 +25,5 @@ def setup_logger(name: str) -> logging.Logger:
     logging.getLogger("fastapi").setLevel(logging.WARNING)
     logging.getLogger("openai._base_client").setLevel(logging.WARNING)
     logging.getLogger("multipart.multipart").setLevel(logging.WARNING)
-
-
 
     return logger

@@ -1,10 +1,11 @@
-from src.logger import setup_logger
 from fastapi import HTTPException
 from .models import DailyIntake
 from .validators import InputValidator, InvalidInputException
 from .calculators import IntakeCalculator
+from ..logger import setup_logger
 
-logger = setup_logger("processors")
+logger = setup_logger(__name__)
+
 
 class IntakeProcessor:
     @staticmethod
@@ -14,6 +15,7 @@ class IntakeProcessor:
         except InvalidInputException as e:
             logger.error(f"Validation error: {e}")
             raise HTTPException(status_code=422, detail=str(e))
-        
-        daily_intake = IntakeCalculator.calculate_daily_intake(validated_user_info)
+
+        daily_intake = IntakeCalculator.calculate_daily_intake(
+            validated_user_info)
         return daily_intake

@@ -1,11 +1,11 @@
+import time
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, declarative_base, Session
 from sqlalchemy.engine import URL
 from sqlalchemy.exc import OperationalError
-from .config import settings
-import time
-from .logger import setup_logger
 from typing import Generator
+from .config import settings
+from .logger import setup_logger
 
 logger = setup_logger(__name__)
 
@@ -21,7 +21,7 @@ def create_postgres_url():
     )
 
 def create_sqlite_engine():
-    return create_engine("sqlite:///./test.db")
+    return create_engine("sqlite:///./backup.db")
 
 # Check if we are in development mode
 is_development = settings.ENV == "development"
