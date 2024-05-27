@@ -13,8 +13,8 @@ from .config import settings
 from .logger import setup_logger
 from .calculator.processors import IntakeProcessor
 from .calculator.models import DailyIntake
-from .schemas import UserInfoRequest, FoodInfo
-from .services import get_db_type
+from .schemas import UserInfoRequest, FoodInfo, UserCreate
+from .services import get_db_type, get_user_by_email, create_user
 
 router = APIRouter()
 logger = setup_logger(__name__)
@@ -22,6 +22,17 @@ logger = setup_logger(__name__)
 assistant_id = settings.ASSISTANT_ID
 db_dependency = Annotated[Session, Depends(get_db)]
 
+
+@router.post("/users")
+async def create_new_user(user: UserCreate, db: db_dependency):
+    """
+    Endpoint to create a new user.
+    """
+    db_user = await get_user_by_email(user.email, db)
+    if db_user:
+        raise HTTPException(status_code=400, detail="Email already exists")
+
+    return await create_user(user, db) 
 
 @router.get("/")
 async def root(db: db_dependency):

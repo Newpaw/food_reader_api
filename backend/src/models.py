@@ -34,7 +34,7 @@ class UserCalories(Base):
 class FoodInfoDB(Base):
     __tablename__ = "food_info"
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
+    owner_id = Column(Integer, ForeignKey("users.id"))
     certainty = Column(Float, nullable=False)
     food_name = Column(String, nullable=False)
     calories_Kcal = Column(Float, nullable=False)
