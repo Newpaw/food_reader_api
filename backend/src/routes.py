@@ -13,7 +13,7 @@ from .config import settings
 from .logger import setup_logger
 from .calculator.processors import IntakeProcessor
 from .calculator.models import DailyIntake
-from .schema import UserInfoRequest, FoodInfo
+from .schemas import UserInfoRequest, FoodInfo
 from .services import get_db_type
 
 router = APIRouter()

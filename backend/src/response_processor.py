@@ -1,7 +1,7 @@
 import json
 import re
 from fastapi import HTTPException
-from .schema import FoodInfo
+from .schemas import FoodInfo
 from .logger import setup_logger
 
 logger = setup_logger(__name__)

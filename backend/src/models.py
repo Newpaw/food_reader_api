@@ -1,9 +1,8 @@
+import passlib.hash as _hash
 from sqlalchemy import Column, Integer, Float, String, ForeignKey, DateTime
-from .database import Base
 from datetime import datetime, timezone
 from sqlalchemy.orm import relationship
-import passlib.hash as _hash
-
+from .database import Base
 
 class User(Base):
     __tablename__ = "users"
