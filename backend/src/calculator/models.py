@@ -3,7 +3,7 @@ from dataclasses import dataclass, asdict
 
 @dataclass
 class UserInfo:
-    user_id: int
+    owner_id: int
     height_cm: float
     weight_kg: float
     age: float
@@ -12,7 +12,7 @@ class UserInfo:
 
 @dataclass
 class DailyIntake:
-    user_id: int
+    owner_id: int
     calories: float
     fat_g: float
     sugar_g: float

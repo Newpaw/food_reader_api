@@ -20,7 +20,7 @@ class User(Base):
 class UserCalories(Base):
     __tablename__ = "user_calories"
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
+    owner_id = Column(Integer, ForeignKey("users.id"))
     calories = Column(Float, nullable=False)
     fat_g = Column(Float, nullable=False)
     sugar_g = Column(Float, nullable=False)
@@ -34,13 +34,13 @@ class UserCalories(Base):
 class FoodInfoDB(Base):
     __tablename__ = "food_info"
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
     certainty = Column(Float, nullable=False)
     food_name = Column(String, nullable=False)
     calories_Kcal = Column(Float, nullable=False)
     fat_in_g = Column(Float, nullable=False)
     sugar_in_g = Column(Float, nullable=False)
     protein_in_g = Column(Float, nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id"))
     date_created = Column(DateTime, default=datetime.now(timezone.utc))
     date_last_updated = Column(DateTime, default=datetime.now(timezone.utc))
 
