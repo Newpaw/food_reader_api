@@ -18,6 +18,8 @@ class Settings:
     POSTGRES_PORT:str = os.getenv("POSTGRES_PORT")
     POSTGRES_DB:str = os.getenv("POSTGRES_DB")
     DATABASE_URL:str = os.getenv("DATABASE_URL")
+    ENV:str = os.getenv("ENV")
+
 
 
 

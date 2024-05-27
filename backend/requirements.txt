@@ -1,6 +1,6 @@
 openai
 python-dotenv
-fastapi 
+fastapi[all]
 uvicorn 
 python-multipart
 pytest
@@ -8,3 +8,5 @@ SQLAlchemy
 aiofiles
 pytest-mock
 psycopg2-binary
+passlib[bcrypt]
+pyjwt

@@ -2,22 +2,42 @@ import os
 from fastapi import APIRouter, FastAPI, File, UploadFile, HTTPException, Depends
 from typing import Annotated
 from sqlalchemy.orm import Session
+from sqlalchemy import text
+
 
 from .database import get_db
 from .response_processor import ResponseProcessor
 from .openai_client.client import OpenAIClient
-from .models import ColoriesToDB, FoodInfoToDB
+from .models import UserCalories, FoodInfoToDB
 from .config import settings
 from .logger import setup_logger
 from .calculator.processors import IntakeProcessor
 from .calculator.models import DailyIntake
 from .schema import UserInfoRequest, FoodInfo
+from .services import get_db_type
 
 router = APIRouter()
 logger = setup_logger("routes")
 
 assistant_id = settings.ASSISTANT_ID
 db_dependency = Annotated[Session, Depends(get_db)]
+
+
+@router.get("/")
+async def root(db: db_dependency):
+    """
+    Root endpoint to check if the database is running.
+    """
+    try:
+        result = db.execute(text("SELECT 1")).scalar()
+        db_type = get_db_type(db.get_bind())
+        if result == 1:
+            return {"status": "success", "message": "Database is running.", "database_type": db_type}
+        else:
+            return {"status": "error", "message": "Unexpected result from database.", "database_type": db_type}
+    except Exception as e:
+        logger.error(f"Database connection error: {e}")
+        return {"status": "error", "message": "Database is not running.", "database_type": "Unknown"}
 
 
 @router.get("/ping")
@@ -35,7 +55,7 @@ async def calculate_intake(user_info: UserInfoRequest, db: db_dependency):
     """
     try:
         daily_intake = IntakeProcessor.process(user_info.model_dump())
-        db_transaction = ColoriesToDB(**daily_intake.to_dict())
+        db_transaction = UserCalories(**daily_intake.to_dict())
         db.add(db_transaction)
         db.commit()
         db.refresh(db_transaction)
@@ -98,6 +118,7 @@ async def analyze_image(db: db_dependency, file: UploadFile = File(...)):
         if os.path.exists(temp_file_path):
             os.remove(temp_file_path)  # Čištění dočasného souboru
         db.close()
+
 
 def setup_routes(app: FastAPI) -> None:
     """
