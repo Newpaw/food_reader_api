@@ -1,4 +1,4 @@
-import passlib.hash as _hash
+from passlib import hash
 from sqlalchemy import Column, Integer, Float, String, ForeignKey, DateTime
 from datetime import datetime, timezone
 from sqlalchemy.orm import relationship
@@ -14,7 +14,7 @@ class User(Base):
     food_info = relationship("FoodInfoDB", back_populates="owner")
 
     def verify_password(self, password: str):
-        return _hash.bcrypt.verify(password.encode('utf-8'), self.hashed_password)
+        return hash.bcrypt.verify(password.encode('utf-8'), self.hashed_password)
 
 
 class UserCalories(Base):

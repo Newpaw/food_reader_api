@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from .models import DailyIntake
+from .schemas import DailyIntake
 from .validators import InputValidator, InvalidInputException
 from .calculators import IntakeCalculator
 from ..logger import setup_logger

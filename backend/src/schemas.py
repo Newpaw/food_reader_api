@@ -1,5 +1,4 @@
 from pydantic import BaseModel, ConfigDict
-import datetime
 
 
 class UserBase(BaseModel):
@@ -9,15 +8,13 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     hashed_password: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class User(UserBase):
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(orm_mode=True, from_attributes=True)
 
 
 class UserInfoRequest(BaseModel):

@@ -1,4 +1,4 @@
-from .models import UserInfo
+from .schemas import UserInfo
 from ..logger import setup_logger
 
 logger = setup_logger(__name__)

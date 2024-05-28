@@ -1,4 +1,4 @@
-from .models import UserInfo, DailyIntake
+from .schemas import UserInfo, DailyIntake
 
 # Define the IntakeCalculator class
 
