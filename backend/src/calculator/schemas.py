@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict
 
 class UserInfo(BaseModel):
     owner_id: int

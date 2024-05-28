@@ -25,11 +25,13 @@ class UserInfoRequest(BaseModel):
     gender: str
     activity_level: str
 
-
-class UserInfoRequestModel(UserInfoRequest):
-    id: int
-
     model_config = ConfigDict(from_attributes=True)
+
+
+class UserWithInfo(User):
+    user_info: UserInfoRequest
+
+    model_config = ConfigDict(orm_mode=True, from_attributes=True)
 
 
 class FoodInfo(BaseModel):
