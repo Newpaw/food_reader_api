@@ -8,8 +8,18 @@ from .config import settings
 from .logger import setup_logger
 from .calculator.schemas import DailyIntake
 from .schemas import UserInfoRequest, FoodInfo, UserCreate, User
-from .services import get_db_type, get_user_by_email, create_user, authenticate_user, create_token, get_current_user, calculate_daily_intake_and_save_to_db, analyze_image_and_save_to_db
-
+from .services import (
+    get_db_type,
+    get_user_by_email,
+    create_user,
+    authenticate_user,
+    create_token,
+    get_current_user,
+    calculate_daily_intake,
+    analyze_image_and_save_to_db,
+    save_daily_intake_to_db,
+    store_food_info_to_db,
+)
 
 router = APIRouter()
 logger = setup_logger(__name__)
@@ -81,7 +91,8 @@ async def calculate_intake(user_info: UserInfoRequest, db: db_dependency):
     """
     Endpoint to calculate daily intake based on user information.
     """
-    daily_intake = await calculate_daily_intake_and_save_to_db(user_info, db)
+    daily_intake = await calculate_daily_intake(user_info, db)
+    await save_daily_intake_to_db(daily_intake, db)
     return daily_intake
 
 
@@ -91,6 +102,7 @@ async def analyze_image(db: Session = Depends(get_db), file: UploadFile = File(.
     Endpoint to analyze an image and extract food information using OpenAI.
     """
     food_info = await analyze_image_and_save_to_db(file, db)
+    await store_food_info_to_db(food_info, db)
     return food_info
 
 

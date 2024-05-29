@@ -90,10 +90,9 @@ async def save_daily_intake_to_db(daily_intake, db: Session):
         db.close()
 
 
-async def calculate_daily_intake_and_save_to_db(user_info: UserInfoRequest, db: Session = Depends(get_db)):
+async def calculate_daily_intake(user_info: UserInfoRequest, db: Session = Depends(get_db)):
     try:
-        daily_intake = await process_daily_intake(user_info)
-        return await save_daily_intake_to_db(daily_intake, db)
+        return await process_daily_intake(user_info)
     except HTTPException as e:
         raise e
     except Exception as e:
@@ -101,7 +100,7 @@ async def calculate_daily_intake_and_save_to_db(user_info: UserInfoRequest, db: 
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-async def store_food_info(food_info: FoodInfo, db: Session = Depends(get_db)):
+async def store_food_info_to_db(food_info: FoodInfo, db: Session = Depends(get_db)):
     try:
         db_transaction = FoodInfoDB(**food_info.model_dump())
         db.add(db_transaction)
@@ -126,9 +125,7 @@ async def analyze_image_and_save_to_db(file: UploadFile, db: Session = Depends(g
         with open(temp_file_path, "wb") as buffer:
             buffer.write(await file.read())
 
-        food_info = client.process_image(temp_file_path)
-        await store_food_info(food_info, db)
-        return food_info
+        return client.process_image(temp_file_path)
 
     except HTTPException as e:
         db.rollback()
