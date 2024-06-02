@@ -6,7 +6,8 @@ from sqlalchemy import text
 from .database import get_db
 from .config import settings
 from .logger import setup_logger
-from .schemas import FoodInfo, UserCreate, User, DailyIntake, UserMetrics
+from .models import UserMetricsDB, UserCalories
+from .schemas import FoodInfo, UserCreate, User, DailyIntakeBase, UserMetrics, DailyIntakeCreate
 from .services import (
     get_db_type,
     get_user_by_email,
@@ -84,12 +85,27 @@ async def get_user(user: User = Depends(get_current_user)):
     return user
 
 
-@router.post("/calculate-intake", response_model=DailyIntake)
+@router.post("/calculate-intake", response_model=DailyIntakeBase)
 async def calculate_intake(user_metrics: UserMetrics, db: db_dependency, user: User = Depends(get_current_user)):
     """
     Endpoint to calculate daily intake based on user information.
     """
     user_daily_intake = await get_calculated_daily_intake(user_metrics)
+    user_daily_intake_dict = user_daily_intake.model_dump()
+    user_daily_intake_dict['user_id'] = user.id
+
+
+    user_met_obj = UserMetricsDB(owner_id=user.id, height_cm=user_metrics.height_cm, weight_kg=user_metrics.weight_kg, 
+                                 age=user_metrics.age, gender=user_metrics.gender, activity_level=user_metrics.activity_level)
+    db.add(user_met_obj)
+    db.commit()
+    db.refresh(user_met_obj)
+
+    user_cal_obj = UserCalories(owner_id=user.id, calories=user_daily_intake.calories, fat_g=user_daily_intake.fat_g, 
+                                sugar_g=user_daily_intake.sugar_g, protein_g=user_daily_intake.protein_g)
+    db.add(user_cal_obj)
+    db.commit()
+    db.refresh(user_cal_obj)
 
     return user_daily_intake.model_dump()
 

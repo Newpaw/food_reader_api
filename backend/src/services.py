@@ -6,7 +6,7 @@ from passlib.hash import bcrypt
 from fastapi import Depends, HTTPException, UploadFile
 from fastapi.security import OAuth2PasswordBearer
 from .models import User, FoodInfoDB
-from .schemas import DailyIntake, UserMetrics, UserCreate, FoodInfo, User as PydanticUser
+from .schemas import DailyIntakeBase, UserMetrics, UserCreate, FoodInfo, User as PydanticUser
 from .config import settings
 from .logger import setup_logger
 from .database import get_db
@@ -72,7 +72,7 @@ async def get_current_user(db: Session = Depends(get_db), token: str = Depends(o
 
 
 
-async def get_calculated_daily_intake(user_metrics = UserMetrics) -> DailyIntake:
+async def get_calculated_daily_intake(user_metrics = UserMetrics) -> DailyIntakeBase:
     if user_metrics.gender == "male":
         bmr = 88.362 + (13.397 * user_metrics.weight_kg) + (4.799 * user_metrics.height_cm) - (5.677 * user_metrics.age)
     else:
@@ -90,10 +90,10 @@ async def get_calculated_daily_intake(user_metrics = UserMetrics) -> DailyIntake
     fat_g = round(daily_calories * 0.25 / 9, 2)
     user_metrics = round(daily_calories * 0.1 / 4, 2)
     sugar_g = round(daily_calories * 0.1 / 4, 2)
-    return DailyIntake(calories=daily_calories, protein_g=protein_g, fat_g=fat_g, user_metrics=user_metrics, sugar_g=sugar_g)
+    return DailyIntakeBase(calories=daily_calories, protein_g=protein_g, fat_g=fat_g, user_metrics=user_metrics, sugar_g=sugar_g)
 
 
-async def save_daily_intake_to_db(owner_id: int, daily_intake: DailyIntake, db: Session = Depends(get_db)):
+async def save_daily_intake_to_db(owner_id: int, daily_intake: DailyIntakeBase, db: Session = Depends(get_db)):
     pass
 
 
