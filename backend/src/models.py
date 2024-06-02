@@ -13,7 +13,7 @@ class User(Base):
 
     calories = relationship("UserCalories", back_populates="owner")
     food_info = relationship("FoodInfoDB", back_populates="owner")
-    user_metrics = relationship("UserMetrics", back_populates="owner")
+    user_metrics = relationship("UserMetricsDB", back_populates="owner")  # Změněno z UserMetrics na UserMetricsDB
 
     def verify_password(self, password: str):
         return hash.bcrypt.verify(password.encode('utf-8'), self.hashed_password)
