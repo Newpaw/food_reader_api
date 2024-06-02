@@ -5,12 +5,11 @@ from sqlalchemy.orm import Session
 from passlib.hash import bcrypt
 from fastapi import Depends, HTTPException, UploadFile
 from fastapi.security import OAuth2PasswordBearer
-from .models import User, UserCalories, FoodInfoDB
-from .schemas import UserCreate, UserInfoRequest, FoodInfo, User as PydanticUser
+from .models import User, FoodInfoDB
+from .schemas import DailyIntake, UserMetrics, UserCreate, FoodInfo, User as PydanticUser
 from .config import settings
 from .logger import setup_logger
 from .database import get_db
-from .calculator.processors import IntakeProcessor
 from .openai_client.client import OpenAIClient
 
 logger = setup_logger(__name__)
@@ -71,33 +70,31 @@ async def get_current_user(db: Session = Depends(get_db), token: str = Depends(o
         return PydanticUser.model_validate(user)
 
 
-async def process_daily_intake(user_info: UserInfoRequest):
-    return IntakeProcessor.process(user_info.model_dump())
 
 
-async def save_daily_intake_to_db(daily_intake, db: Session):
-    try:
-        db_transaction = UserCalories(**daily_intake.model_dump())
-        db.add(db_transaction)
-        db.commit()
-        db.refresh(db_transaction)
-        return db_transaction
-    except Exception as e:
-        db.rollback()
-        logger.error(f"Failed to save daily intake to DB: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
-    finally:
-        db.close()
+async def get_calculated_daily_intake(user_metrics = UserMetrics) -> DailyIntake:
+    if user_metrics.gender == "male":
+        bmr = 88.362 + (13.397 * user_metrics.weight_kg) + (4.799 * user_metrics.height_cm) - (5.677 * user_metrics.age)
+    else:
+        bmr = 447.593 + (9.247 * user_metrics.weight_kg) + (3.098 * user_metrics.height_cm) - (4.330 * user_metrics.age)
+
+    activity_factors = {
+            "low": 1.2,
+            "medium": 1.55,
+            "high": 1.725
+        }
+
+    daily_calories = bmr * activity_factors[user_metrics.activity_level]
+        
+    protein_g = user_metrics.weight_kg * 1.2
+    fat_g = daily_calories * 0.25 / 9
+    user_metrics = daily_calories * 0.1 / 4
+    return DailyIntake(calories=daily_calories, protein_g=protein_g, fat_g=fat_g, user_metrics=user_metrics)
 
 
-async def calculate_daily_intake(user_info: UserInfoRequest, db: Session = Depends(get_db)):
-    try:
-        return await process_daily_intake(user_info)
-    except HTTPException as e:
-        raise e
-    except Exception as e:
-        logger.error(f"Unexpected error: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+async def save_daily_intake_to_db(owner_id: int, daily_intake: DailyIntake, db: Session = Depends(get_db)):
+    pass
+
 
 
 async def store_food_info_to_db(food_info: FoodInfo, db: Session = Depends(get_db)):

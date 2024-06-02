@@ -19,7 +19,7 @@ class User(Base):
         return hash.bcrypt.verify(password.encode('utf-8'), self.hashed_password)
 
 
-class UserMetrics(Base):
+class UserMetricsDB(Base):
     __tablename__ = "user_metrics"
     id = Column(Integer, primary_key=True, index=True)
     owner_id = Column(Integer, ForeignKey("users.id"))
@@ -31,7 +31,7 @@ class UserMetrics(Base):
     date_created = Column(DateTime, default=datetime.now(timezone.utc))
     date_last_updated = Column(DateTime, default=datetime.now(timezone.utc))
 
-    owner = relationship("User", back_populates="metrics")
+    owner = relationship("User", back_populates="user_metrics")
 
 
 class UserCalories(Base):

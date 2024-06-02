@@ -17,19 +17,23 @@ class User(UserBase):
     model_config = ConfigDict(orm_mode=True, from_attributes=True)
 
 
-class UserInfoRequest(BaseModel):
-    owner_id: int
+class DailyIntake(BaseModel):
+    calories: float
+    fat_g: float
+    sugar_g: float
+    protein_g: float
+
+    model_config = ConfigDict(orm_mode=True, from_attributes=True)
+
+
+class UserMetrics(BaseModel):
     height_cm: float
     weight_kg: float
     age: float
     gender: str
     activity_level: str
 
-
-class UserInfoRequestModel(UserInfoRequest):
-    id: int
-
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(orm_mode=True, from_attributes=True)
 
 
 class FoodInfo(BaseModel):

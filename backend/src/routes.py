@@ -6,8 +6,7 @@ from sqlalchemy import text
 from .database import get_db
 from .config import settings
 from .logger import setup_logger
-from .calculator.schemas import DailyIntake
-from .schemas import UserInfoRequest, FoodInfo, UserCreate, User
+from .schemas import FoodInfo, UserCreate, User, DailyIntake, UserMetrics
 from .services import (
     get_db_type,
     get_user_by_email,
@@ -15,10 +14,9 @@ from .services import (
     authenticate_user,
     create_token,
     get_current_user,
-    calculate_daily_intake,
     analyze_image_and_save_to_db,
-    save_daily_intake_to_db,
     store_food_info_to_db,
+    get_calculated_daily_intake,
 )
 
 router = APIRouter()
@@ -87,13 +85,13 @@ async def get_user(user: User = Depends(get_current_user)):
 
 
 @router.post("/calculate-intake", response_model=DailyIntake)
-async def calculate_intake(user_info: UserInfoRequest, db: db_dependency):
+async def calculate_intake(user_metrics: UserMetrics, db: db_dependency, user: User = Depends(get_current_user)):
     """
     Endpoint to calculate daily intake based on user information.
     """
-    daily_intake = await calculate_daily_intake(user_info, db)
-    await save_daily_intake_to_db(daily_intake, db)
-    return daily_intake
+    user_daily_intake = await get_calculated_daily_intake(user_metrics)
+    print(user_daily_intake)
+    pass
 
 
 @router.post("/analyze-image", response_model=FoodInfo)
