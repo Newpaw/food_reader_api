@@ -90,8 +90,12 @@ async def calculate_intake(user_metrics: UserMetrics, db: db_dependency, user: U
     Endpoint to calculate daily intake based on user information.
     """
     user_daily_intake = await get_calculated_daily_intake(user_metrics)
-    print(user_daily_intake)
-    pass
+
+    return user_daily_intake.model_dump()
+
+
+
+
 
 
 @router.post("/analyze-image", response_model=FoodInfo)

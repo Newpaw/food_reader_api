@@ -86,10 +86,11 @@ async def get_calculated_daily_intake(user_metrics = UserMetrics) -> DailyIntake
 
     daily_calories = bmr * activity_factors[user_metrics.activity_level]
         
-    protein_g = user_metrics.weight_kg * 1.2
-    fat_g = daily_calories * 0.25 / 9
-    user_metrics = daily_calories * 0.1 / 4
-    return DailyIntake(calories=daily_calories, protein_g=protein_g, fat_g=fat_g, user_metrics=user_metrics)
+    protein_g = round(user_metrics.weight_kg * 1.2, 2)
+    fat_g = round(daily_calories * 0.25 / 9, 2)
+    user_metrics = round(daily_calories * 0.1 / 4, 2)
+    sugar_g = round(daily_calories * 0.1 / 4, 2)
+    return DailyIntake(calories=daily_calories, protein_g=protein_g, fat_g=fat_g, user_metrics=user_metrics, sugar_g=sugar_g)
 
 
 async def save_daily_intake_to_db(owner_id: int, daily_intake: DailyIntake, db: Session = Depends(get_db)):
