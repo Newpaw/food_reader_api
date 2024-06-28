@@ -22,7 +22,7 @@ class User(Base):
 class UserMetricsDB(Base):
     __tablename__ = "user_metrics"
     id = Column(Integer, primary_key=True, index=True)
-    owner_id = Column(Integer, ForeignKey("users.id"))
+    owner_id = Column(Integer, ForeignKey("users.id"), unique=True)
     height_cm = Column(Float, nullable=False)
     weight_kg = Column(Float, nullable=False)
     age = Column(Float, nullable=False)

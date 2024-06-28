@@ -3,11 +3,13 @@ from fastapi.security import OAuth2PasswordRequestForm
 from typing import Annotated
 from sqlalchemy.orm import Session
 from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError
 from .database import get_db
 from .config import settings
 from .logger import setup_logger
 from .models import UserMetricsDB, UserCalories
-from .schemas import FoodInfo, UserCreate, User, DailyIntakeBase, UserMetrics, DailyIntakeCreate
+from . import schemas as _schemas
+from . import exceptions as _exceptions
 from .services import (
     get_db_type,
     get_user_by_email,
@@ -53,7 +55,7 @@ async def ping():
 
 
 @router.post("/users")
-async def create_new_user(user: UserCreate, db: db_dependency):
+async def create_new_user(user: _schemas.UserCreate, db: db_dependency):
     """
     Endpoint to create a new user.
     """
@@ -77,31 +79,32 @@ async def generate_token(db: db_dependency, form_data: OAuth2PasswordRequestForm
     return await create_token(user)
 
 
-@router.get("/users/me", response_model=User)
-async def get_user(user: User = Depends(get_current_user)):
+@router.get("/users/me", response_model=_schemas.User)
+async def get_user(user: _schemas.User = Depends(get_current_user)):
     """
     Endpoint to get the current user.
     """
     return user
 
 
-@router.post("/calculate-intake", response_model=DailyIntakeBase)
-async def calculate_intake(user_metrics: UserMetrics, db: db_dependency, user: User = Depends(get_current_user)):
+@router.post("/calculate-intake", response_model=_schemas.DailyIntakeBase)
+async def calculate_intake(user_metrics: _schemas.UserMetrics, db: db_dependency, user: _schemas.User = Depends(get_current_user)):
     """
     Endpoint to calculate daily intake based on user information.
     """
     user_daily_intake = await get_calculated_daily_intake(user_metrics)
-    user_daily_intake_dict = user_daily_intake.model_dump()
-    user_daily_intake_dict['user_id'] = user.id
 
-
-    user_met_obj = UserMetricsDB(owner_id=user.id, height_cm=user_metrics.height_cm, weight_kg=user_metrics.weight_kg, 
+    user_met_obj = UserMetricsDB(owner_id=user.id, height_cm=user_metrics.height_cm, weight_kg=user_metrics.weight_kg,
                                  age=user_metrics.age, gender=user_metrics.gender, activity_level=user_metrics.activity_level)
-    db.add(user_met_obj)
-    db.commit()
-    db.refresh(user_met_obj)
+    try:
+        db.add(user_met_obj)
+        db.commit()
+        db.refresh(user_met_obj)
+    except IntegrityError:
+        db.rollback()
+        raise _exceptions.UniqueConstraintFailedException(detail="User metrics already exist for this user.")
 
-    user_cal_obj = UserCalories(owner_id=user.id, calories=user_daily_intake.calories, fat_g=user_daily_intake.fat_g, 
+    user_cal_obj = UserCalories(owner_id=user.id, calories=user_daily_intake.calories, fat_g=user_daily_intake.fat_g,
                                 sugar_g=user_daily_intake.sugar_g, protein_g=user_daily_intake.protein_g)
     db.add(user_cal_obj)
     db.commit()
@@ -110,11 +113,7 @@ async def calculate_intake(user_metrics: UserMetrics, db: db_dependency, user: U
     return user_daily_intake.model_dump()
 
 
-
-
-
-
-@router.post("/analyze-image", response_model=FoodInfo)
+@router.post("/analyze-image", response_model=_schemas.FoodInfo)
 async def analyze_image(db: Session = Depends(get_db), file: UploadFile = File(...)):
     """
     Endpoint to analyze an image and extract food information using OpenAI.
