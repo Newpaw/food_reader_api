@@ -11,6 +11,7 @@ from .config import settings
 from .logger import setup_logger
 from .database import get_db
 from .openai_client.client import OpenAIClient
+from .models import UserMetricsDB, UserCalories
 
 logger = setup_logger(__name__)
 
@@ -70,22 +71,30 @@ async def get_current_user(db: Session = Depends(get_db), token: str = Depends(o
         return PydanticUser.model_validate(user)
 
 
+async def get_user_metrics(user_id: int, db: Session = Depends(get_db)) -> UserMetricsDB:
+    return db.query(UserMetricsDB).filter(UserMetricsDB.owner_id == user_id).first()
 
 
-async def get_calculated_daily_intake(user_metrics = UserMetrics) -> DailyIntakeBase:
+async def get_user_calculated_daily_intake(user_id: int, db: Session = Depends(get_db)) -> DailyIntakeBase:
+    return db.query(UserCalories).filter(UserCalories.owner_id == user_id).first()
+
+
+async def get_calculated_daily_intake(user_metrics=UserMetrics) -> DailyIntakeBase:
     if user_metrics.gender == "male":
-        bmr = 88.362 + (13.397 * user_metrics.weight_kg) + (4.799 * user_metrics.height_cm) - (5.677 * user_metrics.age)
+        bmr = 88.362 + (13.397 * user_metrics.weight_kg) + \
+            (4.799 * user_metrics.height_cm) - (5.677 * user_metrics.age)
     else:
-        bmr = 447.593 + (9.247 * user_metrics.weight_kg) + (3.098 * user_metrics.height_cm) - (4.330 * user_metrics.age)
+        bmr = 447.593 + (9.247 * user_metrics.weight_kg) + \
+            (3.098 * user_metrics.height_cm) - (4.330 * user_metrics.age)
 
     activity_factors = {
-            "low": 1.2,
-            "medium": 1.55,
-            "high": 1.725
-        }
+        "low": 1.2,
+        "medium": 1.55,
+        "high": 1.725
+    }
 
     daily_calories = bmr * activity_factors[user_metrics.activity_level]
-        
+
     protein_g = round(user_metrics.weight_kg * 1.2, 2)
     fat_g = round(daily_calories * 0.25 / 9, 2)
     user_metrics = round(daily_calories * 0.1 / 4, 2)
@@ -95,7 +104,6 @@ async def get_calculated_daily_intake(user_metrics = UserMetrics) -> DailyIntake
 
 async def save_daily_intake_to_db(owner_id: int, daily_intake: DailyIntakeBase, db: Session = Depends(get_db)):
     pass
-
 
 
 async def store_food_info_to_db(food_info: FoodInfo, db: Session = Depends(get_db)):

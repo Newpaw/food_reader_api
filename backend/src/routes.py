@@ -20,6 +20,8 @@ from .services import (
     analyze_image_and_save_to_db,
     store_food_info_to_db,
     get_calculated_daily_intake,
+    get_user_metrics,
+    get_user_calculated_daily_intake,
 )
 
 router = APIRouter()
@@ -111,6 +113,30 @@ async def calculate_intake(user_metrics: _schemas.UserMetrics, db: db_dependency
     db.refresh(user_cal_obj)
 
     return user_daily_intake.model_dump()
+
+@router.get("/users/me/metrics", response_model=_schemas.UserMetrics)
+async def user_metrics(db: db_dependency, user: _schemas.User = Depends(get_current_user)):
+    """
+    Endpoint to get user metrics.
+    """
+    user_metrics = await get_user_metrics(user.id, db)
+    if user_metrics is None:
+        raise HTTPException(status_code=404, detail="User metrics not found")
+    return user_metrics
+
+
+
+@router.get("/users/me/daily-intake", response_model=_schemas.DailyIntakeBase)
+async def daily_intake(db: db_dependency, user: _schemas.User = Depends(get_current_user)):
+    """
+    Endpoint to get user daily intake.
+    """
+    user_daily_intake = await get_user_calculated_daily_intake(user.id, db)
+    if user_daily_intake is None:
+        raise HTTPException(status_code=404, detail="User daily intake not found")
+    return user_daily_intake
+
+
 
 
 @router.post("/analyze-image", response_model=_schemas.FoodInfo)
