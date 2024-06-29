@@ -72,7 +72,7 @@ async def get_user(user: _schemas.User = Depends(_services.get_current_user)):
 @router.post("/calculate-intake", response_model=_schemas.DailyIntakeBase)
 async def calculate_intake(user_metrics: _schemas.UserMetrics, db: db_dependency, user: _schemas.User = Depends(_services.get_current_user)):
     """
-    Endpoint to calculate daily intake based on user information.
+    Endpoint to calculate and save daily intake based on user information (user information is stored in the database).
     """
     user_daily_intake = await _services.get_calculated_daily_intake(user_metrics)
 
