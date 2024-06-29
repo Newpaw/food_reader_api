@@ -5,18 +5,19 @@ from sqlalchemy.orm import Session
 from passlib.hash import bcrypt
 from fastapi import Depends, HTTPException, UploadFile
 from fastapi.security import OAuth2PasswordBearer
-from .models import User, FoodInfoDB
-from .schemas import DailyIntakeBase, UserMetrics, UserCreate, FoodInfo, User as PydanticUser
+from typing import Annotated
+from . import models as _models 
+from . import schemas as _schemas
 from .config import settings
 from .logger import setup_logger
 from .database import get_db
 from .openai_client.client import OpenAIClient
-from .models import UserMetricsDB, UserCalories
 
 logger = setup_logger(__name__)
 
 oauth2schema = OAuth2PasswordBearer(tokenUrl="/token")
 
+db_dependency = Annotated[Session, Depends(get_db)]
 
 def get_db_type(engine: Engine) -> str:
     if 'postgresql' in str(engine.url):
@@ -29,11 +30,11 @@ def get_db_type(engine: Engine) -> str:
 
 
 async def get_user_by_email(email: str, db: Session):
-    return db.query(User).filter(User.email == email).first()
+    return db.query(_models.User).filter(_models.User.email == email).first()
 
 
-async def create_user(user: UserCreate, db: Session):
-    user_obj = User(email=user.email,
+async def create_user(user: _schemas.UserCreate, db: Session):
+    user_obj = _models.User(email=user.email,
                     hashed_password=bcrypt.hash(user.hashed_password))
     db.add(user_obj)
     db.commit()
@@ -42,7 +43,7 @@ async def create_user(user: UserCreate, db: Session):
 
 
 async def get_user(user_id: int, db: Session):
-    return db.query(User).filter(User.id == user_id).first()
+    return db.query(_models.User).filter(_models.User.id == user_id).first()
 
 
 async def authenticate_user(email: str, password: str, db: Session):
@@ -54,32 +55,32 @@ async def authenticate_user(email: str, password: str, db: Session):
     return user
 
 
-async def create_token(user: User):
-    user_obj = PydanticUser.model_validate(user)
+async def create_token(user: _models.User):
+    user_obj = _schemas.User.model_validate(user)
     token = encode(user_obj.model_dump(), settings.JWT_SECRET)
 
     return dict(access_token=token, token_type="bearer")
 
 
-async def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2schema)):
+async def get_current_user(db: db_dependency, token: str = Depends(oauth2schema)):
     try:
         payload = decode(token, settings.JWT_SECRET, algorithms=["HS256"])
-        user = db.query(User).get(payload["id"])
+        user = db.query(_models.User).get(payload["id"])
     except:
         return HTTPException(status_code=401, detail="Invalid email or password")
     finally:
-        return PydanticUser.model_validate(user)
+        return _schemas.User.model_validate(user)
 
 
-async def get_user_metrics(user_id: int, db: Session = Depends(get_db)) -> UserMetricsDB:
-    return db.query(UserMetricsDB).filter(UserMetricsDB.owner_id == user_id).first()
+async def get_user_metrics(user_id: int, db: db_dependency) -> _models.UserMetricsDB:
+    return db.query(_models.UserMetricsDB).filter(_models.UserMetricsDB.owner_id == user_id).first()
 
 
-async def get_user_calculated_daily_intake(user_id: int, db: Session = Depends(get_db)) -> DailyIntakeBase:
-    return db.query(UserCalories).filter(UserCalories.owner_id == user_id).first()
+async def get_user_calculated_daily_intake(user_id: int, db: db_dependency) -> _schemas.DailyIntakeBase:
+    return db.query(_models.UserCalories).filter(_models.UserCalories.owner_id == user_id).first()
 
 
-async def get_calculated_daily_intake(user_metrics=UserMetrics) -> DailyIntakeBase:
+async def get_calculated_daily_intake(user_metrics=_schemas.UserMetrics) -> _schemas.DailyIntakeBase:
     if user_metrics.gender == "male":
         bmr = 88.362 + (13.397 * user_metrics.weight_kg) + \
             (4.799 * user_metrics.height_cm) - (5.677 * user_metrics.age)
@@ -99,16 +100,16 @@ async def get_calculated_daily_intake(user_metrics=UserMetrics) -> DailyIntakeBa
     fat_g = round(daily_calories * 0.25 / 9, 2)
     user_metrics = round(daily_calories * 0.1 / 4, 2)
     sugar_g = round(daily_calories * 0.1 / 4, 2)
-    return DailyIntakeBase(calories=daily_calories, protein_g=protein_g, fat_g=fat_g, user_metrics=user_metrics, sugar_g=sugar_g)
+    return _schemas.DailyIntakeBase(calories=daily_calories, protein_g=protein_g, fat_g=fat_g, user_metrics=user_metrics, sugar_g=sugar_g)
 
 
-async def save_daily_intake_to_db(owner_id: int, daily_intake: DailyIntakeBase, db: Session = Depends(get_db)):
+async def save_daily_intake_to_db(owner_id: int, daily_intake: _schemas.DailyIntakeBase, db: db_dependency):
     pass
 
 
-async def store_food_info_to_db(food_info: FoodInfo, db: Session = Depends(get_db)):
+async def store_food_info_to_db(food_info: _schemas.FoodInfo, db: db_dependency):
     try:
-        db_transaction = FoodInfoDB(**food_info.model_dump())
+        db_transaction = _models.FoodInfoDB(**food_info.model_dump())
         db.add(db_transaction)
         db.commit()
         db.refresh(db_transaction)
@@ -120,7 +121,7 @@ async def store_food_info_to_db(food_info: FoodInfo, db: Session = Depends(get_d
         db.close()
 
 
-async def analyze_image_and_save_to_db(file: UploadFile, db: Session = Depends(get_db)):
+async def analyze_image_and_save_to_db(file: UploadFile, db: db_dependency):
     """
     Endpoint to analyze an image and extract food information using OpenAI.
     """
